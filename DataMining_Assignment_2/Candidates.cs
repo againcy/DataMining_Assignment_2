@@ -136,9 +136,6 @@ namespace DataMining_Assignment_2
             itemSets = newItemSets;
         }
 
-        public void GenerateHashTree()
-        {
-
-        }
+        
     }
 }

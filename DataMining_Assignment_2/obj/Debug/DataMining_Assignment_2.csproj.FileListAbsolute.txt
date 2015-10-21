@@ -3,3 +3,8 @@ C:\Users\Liuyibin\Documents\Visual Studio 2015\Projects\DataMining_Assignment_2\
 C:\Users\Liuyibin\Documents\Visual Studio 2015\Projects\DataMining_Assignment_2\DataMining_Assignment_2\obj\Debug\DataMining_Assignment_2.csprojResolveAssemblyReference.cache
 C:\Users\Liuyibin\Documents\Visual Studio 2015\Projects\DataMining_Assignment_2\DataMining_Assignment_2\obj\Debug\DataMining_Assignment_2.exe
 C:\Users\Liuyibin\Documents\Visual Studio 2015\Projects\DataMining_Assignment_2\DataMining_Assignment_2\obj\Debug\DataMining_Assignment_2.pdb
+C:\Users\LiuYibin\documents\visual studio 2012\Projects\DataMining_Assignment_2\DataMining_Assignment_2\obj\Debug\DataMining_Assignment_2.exe
+C:\Users\LiuYibin\documents\visual studio 2012\Projects\DataMining_Assignment_2\DataMining_Assignment_2\obj\Debug\DataMining_Assignment_2.pdb
+C:\Users\LiuYibin\documents\visual studio 2012\Projects\DataMining_Assignment_2\DataMining_Assignment_2\obj\Debug\DataMining_Assignment_2.csprojResolveAssemblyReference.cache
+C:\Users\LiuYibin\documents\visual studio 2012\Projects\DataMining_Assignment_2\DataMining_Assignment_2\bin\Debug\DataMining_Assignment_2.exe
+C:\Users\LiuYibin\documents\visual studio 2012\Projects\DataMining_Assignment_2\DataMining_Assignment_2\bin\Debug\DataMining_Assignment_2.pdb

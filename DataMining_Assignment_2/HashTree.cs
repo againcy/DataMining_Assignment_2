@@ -34,8 +34,8 @@ namespace DataMining_Assignment_2
     /// <typeparam name="T">元素类型</typeparam>
     class HashTree<T> 
     {
-        public delegate int HashFunction(T[] data, int level);
-        public delegate string NodePrintFunction(T[] nodeData);
+        public delegate int HashFunction(T[] data, int level);//外部传入的hash函数
+        public delegate string NodePrintFunction(T[] nodeData);//外部传入的打印节点的函数
         /// <summary>
         /// hash函数
         /// </summary>
@@ -79,6 +79,22 @@ namespace DataMining_Assignment_2
         {
             HashFunc = h;
             PrintFunc = n;
+            seperation = sep;
+            threshold = thres;
+            bottom = b;
+            root = null;
+        }
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="h">hash函数</param>
+        /// <param name="sep">hash值分界点，小于等于该值放左子树，大于该值放右子树</param>
+        /// <param name="thres">一个节点下最多存放的值的个数</param>
+        /// <param name="b">树最深的层数</param>
+        public HashTree(HashFunction h, int sep, int thres, int b)
+        {
+            HashFunc = h;
             seperation = sep;
             threshold = thres;
             bottom = b;
