@@ -40,8 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FrequentItemSet.cs" />
-    <Compile Include="ItemSet.cs" />
+    <Compile Include="Candidates.cs" />
+    <Compile Include="HashTree.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transaction.cs" />

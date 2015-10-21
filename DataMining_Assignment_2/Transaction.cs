@@ -10,15 +10,21 @@ namespace DataMining_Assignment_2
         /// <summary>
         /// 项集
         /// </summary>
-        public LinkedList<ItemSet<T>> ItemSets
+        public T[] Items
         {
             get
             {
-                return itemSets;
+                return items;
             }
         }
-        private LinkedList<ItemSet<T>> itemSets;
+        private T[] items;
 
+        public Transaction(T[] i)
+        {
+            items = i;
+        }
+
+        /*
         private T[] itemName;
         private int itemCount;
 
@@ -26,7 +32,7 @@ namespace DataMining_Assignment_2
         {
             itemSets = new LinkedList<ItemSet<T>>();
         }
-
+        
         /// <summary>
         /// 设置item名称及数量
         /// </summary>
@@ -37,20 +43,23 @@ namespace DataMining_Assignment_2
             itemCount = n;
             itemName = names;
         }
-
+        
         /// <summary>
-        /// 添加一个item set
+        /// 添加一个item
         /// </summary>
-        /// <param name="value">item set的值，0表示不存在对应的item，1表示存在</param>
-        public void AddItemSet(int[] value)
+        /// <param name="value">添加的item</param>
+        public void AddItem(T item)
         {
+            
             ItemSet<T> newItemSet = new ItemSet<T>();
             for (int i = 0; i < itemCount; i++)
             {
                 if (value[i] == 1) newItemSet.AddItem(itemName[i]);
             }
             itemSets.AddLast(newItemSet);
+            
+            items.AddLast(item);
         }
-
+        */
     }
 }
