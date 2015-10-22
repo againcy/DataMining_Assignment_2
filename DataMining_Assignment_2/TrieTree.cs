@@ -16,18 +16,20 @@ namespace DataMining_Assignment_2
         /// 节点的support counting
         /// </summary>
         public int v;
+        /// <summary>
+        /// 判断节点是否到达过
+        /// </summary>
+        public bool tagArrival;
 
         public TrieNode()
         {
             children = null;
             v = -1;
+            tagArrival = false;
         }
     }
     class TrieTree<T> where T : System.IComparable<T>
     {
-        public delegate void NodePrintFunction(string str);
-
-        private NodePrintFunction NodePrint;
         /// <summary>
         /// 根节点
         /// </summary>
@@ -40,10 +42,9 @@ namespace DataMining_Assignment_2
         }
         private TrieNode<T> root;
 
-        public TrieTree(NodePrintFunction n)
+        public TrieTree()
         {
             root = new TrieNode<T>();
-            NodePrint = n;
         }
 
         /// <summary>
@@ -83,7 +84,14 @@ namespace DataMining_Assignment_2
                     {
                         TrieNode<T> newNode = new TrieNode<T>();
                         newNode.data = newData[depth];
-                        cur.children.AddAfter(prev, newNode);
+                        if (prev != null)
+                        {
+                            cur.children.AddAfter(prev, newNode);
+                        }
+                        else
+                        {
+                            cur.children.AddBefore(node, newNode);
+                        }
                         cur = newNode;
                     }
                 }
@@ -93,22 +101,54 @@ namespace DataMining_Assignment_2
         }
 
         /// <summary>
-        /// 先序遍历并输出
+        /// 清楚所有的到达标记
         /// </summary>
-        /// <param name="cur"></param>
-        public void Output(TrieNode<T> cur, string outputStr)
+        /// <param name="cur">父节点</param>
+        public void ClearTag(TrieNode<T> cur)
         {
-            outputStr += cur.data.ToString()+" ";
-            if (cur.v != -1) NodePrint(outputStr + ":"+cur.v.ToString()+"\n");
-            if (cur.children != null)
+            if (cur != null)
             {
-                LinkedListNode<TrieNode<T>> node = cur.children.First;
-                while (node != null)
+                cur.tagArrival = false;
+                if (cur.children != null)
                 {
-                    Output(node.Value, outputStr);
-                    node = node.Next;
+                    foreach (var node in cur.children)
+                    {
+                        ClearTag(node);
+                    }
                 }
             }
+        }
+
+        /// <summary>
+        /// 获取下一个字典中的词
+        /// </summary>
+        /// <param name="cur"></param>
+        /// <returns></returns>
+        public string GetNodeData(TrieNode<T> cur)
+        {
+            if (cur != null)
+            {
+                if (cur.tagArrival == false && cur.v != -1)
+                {
+                    cur.tagArrival = true;
+                    return cur.data.ToString()+" "+cur.v.ToString();
+                }
+                else
+                {
+                    if (cur.children != null)
+                    {
+                        LinkedListNode<TrieNode<T>> node = cur.children.First;
+                        while (node != null)
+                        {
+                            string str = GetNodeData(node.Value);
+                            if (str != "") return cur.data.ToString() + " " + str;
+                            node = node.Next;
+                        }
+                    }
+                    return "";
+                }
+            }
+            else return "";
         }
     }
 }

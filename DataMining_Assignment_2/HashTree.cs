@@ -9,13 +9,13 @@ namespace DataMining_Assignment_2
     /// 二叉树节点
     /// </summary>
     /// <typeparam name="T">元素的类型</typeparam>
-    class TreeNode<T> 
+    class TreeNode<T> where T :IComparable<T>
     {
         public TreeNode(int l)
         {
             left = null;
             right = null;
-            list = new Dictionary<T[], int>();
+            list = new LinkedList<Candidates<T>.DataType>();
             level = l;
         }
         public TreeNode<T> left;
@@ -23,7 +23,7 @@ namespace DataMining_Assignment_2
         /// <summary>
         /// 节点中的数据，value为其support值
         /// </summary>
-        public Dictionary<T[], int> list;
+        public LinkedList<Candidates<T>.DataType> list;
         public int level;//层数
         public bool tagArrival;//判断当前叶节点是否到达过
     }
@@ -32,7 +32,7 @@ namespace DataMining_Assignment_2
     /// Hash树
     /// </summary>
     /// <typeparam name="T">元素类型</typeparam>
-    class HashTree<T> 
+    class HashTree<T> where T : IComparable<T>
     {
         public delegate int HashFunction(T[] data, int level);//外部传入的hash函数
         public delegate string NodePrintFunction(T[] nodeData);//外部传入的打印节点的函数
@@ -104,47 +104,58 @@ namespace DataMining_Assignment_2
         /// <summary>
         /// 添加节点
         /// </summary>
-        /// <param name="data">加入的数据</param>
-        public void AddNode(T[] data)
+        /// <param name="nodeData">加入的数据</param>
+        public void AddNode(Candidates<T>.DataType nodeData)
         {
             if (root==null)
             {
                 root = new TreeNode<T>(0);
-                root.list.Add(data,0);
+                root.list.AddLast(nodeData);
             }
             else
             {
                 TreeNode<T> cur = root;
                 TreeNode<T> parent = null;
+                int direction = -1;
                 while (cur!=null && (cur.left!=null || cur.right!=null))
                 {
                     //cur不是叶子节点
                     parent = cur;
-                    int h = HashFunc(data, cur.level);
-                    if (h <= seperation) cur = cur.left;
-                    else cur = cur.right;
+                    int h = HashFunc(nodeData.data, cur.level);
+                    if (h <= seperation)
+                    {
+                        cur = cur.left;
+                        direction = -1;
+                    }
+                    else
+                    {
+                        cur = cur.right;
+                        direction = 1;
+                    }
                 }
                 //找到所属的叶子节点
                 if (cur==null)
                 {
                     //cur为新的节点，且一定不为根
                     cur = new TreeNode<T>(parent.level + 1);
-                    cur.list.Add(data, 0);
+                    cur.list.AddLast(nodeData);
+                    if (direction == -1) parent.left = cur;
+                    else parent.right = cur;
                 }
                 else
                 {
-                    cur.list.Add(data, 0);
+                    cur.list.AddLast(nodeData);
                     if (cur.list.Count() > threshold && cur.level < bottom)
                     {
                         //需要扩展当前节点
-                        while (cur.left == null || cur.right == null)
+                        while ((cur.left == null || cur.right == null) && cur.level<bottom)
                         {
                             TreeNode<T> leftNode = new TreeNode<T>(cur.level + 1);
                             TreeNode<T> rightNode = new TreeNode<T>(cur.level + 1);
                             foreach (var v in cur.list)
                             {
-                                if (HashFunc(v.Key, cur.level) <= seperation) leftNode.list.Add(v.Key,v.Value);
-                                else rightNode.list.Add(v.Key,v.Value);
+                                if (HashFunc(v.data, cur.level) <= seperation) leftNode.list.AddLast(v);
+                                else rightNode.list.AddLast(v);
                             }
                             if (leftNode.list.Count() > 0) cur.left = leftNode;
                             if (rightNode.list.Count() > 0) cur.right = rightNode;
@@ -183,15 +194,15 @@ namespace DataMining_Assignment_2
             {
                 if (cur.tagArrival == true) return;
                 //到达叶子节点，且之前未到达过
-                LinkedList<T[]> subset = new LinkedList<T[]>();
-                foreach(var data in cur.list.Keys)
+                LinkedList<Candidates<T>.DataType> subset = new LinkedList<Candidates<T>.DataType>();
+                foreach(var nodeData in cur.list)
                 {
                     //判断data是否为transaction的一个子集，所有数据均为字典序
                     int i_data = 0;
                     int i_trans = 0;
-                    while (i_trans<transaction.Items.Count() && i_data<data.Count())
+                    while (i_trans<transaction.Items.Count() && i_data<nodeData.data.Count())
                     {
-                        if (object.Equals( transaction.Items[i_trans],data[i_data]))
+                        if (object.Equals(transaction.Items[i_trans], nodeData.data[i_data]))
                         {
                             i_data++;
                             i_trans++;
@@ -201,9 +212,22 @@ namespace DataMining_Assignment_2
                             i_trans++;
                         }
                     }
-                    if (i_data >= data.Count()) subset.AddLast(data);
+                    
+                    if (i_data >= nodeData.data.Count()) subset.AddLast(nodeData);
                 }
-                foreach (var data in subset) cur.list[data]++;
+                //将子集的value加1
+                var node = cur.list.First;
+                while (node!=null)
+                {
+                    if (subset.Find(node.Value) != null)
+                    {
+                        Candidates<T>.DataType d = node.Value;
+                        d.value++;
+                        node.Value = d;
+                    }
+                    node = node.Next;
+                }
+                
                 cur.tagArrival = true;
             }
             else
@@ -212,10 +236,43 @@ namespace DataMining_Assignment_2
                 for(int i =index+1;i<transaction.Items.Count();i++)
                 {
                     //对index之后的位置分别进行hash
-                    if (HashFunc(transaction.Items, i) <= seperation) SupportCounting(transaction, cur.left, i);
-                    else SupportCounting(transaction, cur.right, i);
+                    if (transaction.Items.Count() > i)
+                    {
+                        if (HashFunc(transaction.Items, i) <= seperation) SupportCounting(transaction, cur.left, i);
+                        else SupportCounting(transaction, cur.right, i);
+                    }
                 }
             }
+        }
+
+        /// <summary>
+        /// 逐个返回叶节点
+        /// </summary>
+        /// <param name="cur">父亲节点</param>
+        /// <returns>null或叶节点</returns>
+        public TreeNode<T> GetLeaves(TreeNode<T> cur)
+        {
+            if (cur != null)
+            {
+                if (cur.left == null && cur.right == null && cur.tagArrival == false)
+                {
+                    cur.tagArrival = true;
+                    return cur;
+                }
+                else
+                {
+                    TreeNode<T> l, r;
+                    l = GetLeaves(cur.left);
+                    if (l != null) return l;
+                    else
+                    {
+                        r = GetLeaves(cur.right);
+                        if (r != null) return r;
+                    }
+                    return null;
+                }
+            }
+            else return null;
         }
 
         /// <summary>
@@ -229,13 +286,12 @@ namespace DataMining_Assignment_2
             Console.Write("Level:" + node.level.ToString() + "; ");
             foreach (var d in node.list)
             {
-                Console.Write(PrintFunc(d.Key)+"("+d.Value+"),");
+                Console.Write(PrintFunc(d.data)+"("+d.value+"),");
             }
             Console.WriteLine();
             PrintTree(node.left);
             PrintTree(node.right);
         }
-
 
     }
 }

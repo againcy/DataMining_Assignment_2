@@ -8,135 +8,21 @@ namespace DataMining_Assignment_2
 {
     class Program
     {
-        /*
-        static Candidates<char> c1;
-        static Candidates<char> c2;
-        static void test()
-        {
-            c1 = new Candidates<char>();
-            char[] k1 = new char[2];
-            k1[0] = 'a';
-            k1[1] = 'b';
-            char[] k2 = new char[2];
-            k2[0] = 'a';
-            k2[1] = 'c';
-            char[] k3 = new char[2];
-            k3[0] = 'a';
-            k3[1] = 'd';
-            char[] k4 = new char[2];
-            k4[0] = 'b';
-            k4[1] = 'c';
-
-            c1.AddCandidate(k1);
-            c1.AddCandidate(k2);
-            c1.AddCandidate(k3);
-            c1.AddCandidate(k4);
-            
-            c2 = new Candidates<char>();
-            foreach(var tmp in c1.GenerateNewCandidates())
-            {
-                foreach (var c in tmp) Console.Write(c);
-                c2.AddCandidate(tmp);
-                Console.WriteLine();
-            }
-            Console.WriteLine("Pruning...");
-            c2.Pruning(c1.ItemSets);
-            foreach(var tmp in c2.ItemSets)
-            {
-                foreach (var c in tmp) Console.Write(c);
-                Console.WriteLine();
-            }
-
-        }
-
-        static int hashcode(int[] data, int level)
-        {
-            return data[level] % 2;
-        }
-        static string nodePrint(int[] data)
-        {
-            string str = "";
-            foreach (var i in data) str += i.ToString();
-            return str;
-        }
-
-        static void trieprint(string str)
-        {
-            Console.Write(str);
-        }
-        static void testTree()
-        {
-            HashTree<int> tree = new HashTree<int>(hashcode, 0, 2, 3,nodePrint);
-            int[] a1 = { 0, 1, 2 };
-            int[] a2 = { 0, 2, 3 };
-            int[] a3 = { 1, 2, 4 };
-            int[] a4 = { 1, 3, 4 };
-            int[] a5 = { 2, 3, 4 };
-            tree.AddNode(a1);
-            tree.AddNode(a2);
-            tree.AddNode(a3);
-            tree.AddNode(a4);
-            tree.AddNode(a5);
-
-            int[] t1 = { 0, 1, 2, 3 };
-            int[] t2 = { 0, 1, 2, 4 };
-            Transaction<int> trans1 = new Transaction<int>(t1);
-            Transaction<int> trans2 = new Transaction<int>(t2);
-
-            tree.ClearTag(tree.Root);
-            tree.SupportCounting(trans1, tree.Root, -1);
-            tree.ClearTag(tree.Root);
-            tree.SupportCounting(trans2, tree.Root, -1);
-            tree.PrintTree(tree.Root);
-        }
-        static void testTrie()
-        {
-            TrieTree<int> tree = new TrieTree<int>(trieprint);
-            int[] b1 = { 0 };
-            int[] b2 = { 1 };
-            int[] a1 = { 0, 1, };
-            int[] a2 = { 0, 1, 2 };
-            int[] a3 = { 1, 2, 4 };
-            int[] a4 = { 1, 3, 4 };
-            int[] a5 = { 2, 3, 4 };
-            
-            tree.AddNode(b1, 1);
-            tree.AddNode(b2, 2);
-            tree.AddNode(a1, 3);
-            tree.AddNode(a2, 4);
-            tree.AddNode(a3, 5);
-            tree.AddNode(a4, 6);
-            tree.AddNode(a5, 7);
-            foreach (var node in tree.Root.children) tree.Output(node,"");
-
-        }
-        */
-        static LinkedList<Transaction<int>> transactions;
-        static LinkedList<Candidates<int>> candidates;
-        static LinkedList<int> itemName;
+        static LinkedList<Transaction<int>> transactions;//项集的集合
+        static LinkedList<Candidates<int>> frequentItemsets;//频繁项集合
+        static int[] itemName;//项的名称
+        static double minsup;//最小support counting
+        static string addrRoot = @"G:\Data Mining\Assignment_2\";
 
         static void Input()
         {
             transactions = new LinkedList<Transaction<int>>();
-            StreamReader sr = new StreamReader(@"G:\AgaIn_FieLd\大学_研究生\DataMining\assignment_2\assignment2-data.txt");
-            itemName = new LinkedList<int>();
+            StreamReader sr = new StreamReader(addrRoot+ @"assignment2-data.txt");
+            
             //读入项的名称
             string str = sr.ReadLine();
-            int id1 = str.IndexOf(' ');
-            int id2 = 0;
-            while (id1 != -1)
-            {
-                int tmp;
-                int.TryParse(str.Substring(id2, id1 - id2), out tmp);
-                itemName.AddLast(tmp);
-                id2 = id1 + 1;
-                id1 = str.IndexOf(' ', id2); 
-            }
-            int t;
-            int.TryParse(str.Substring(id2), out t);
-            itemName.AddLast(t);
-            int[] name = new int[itemName.Count()];
-            name = itemName.ToArray();
+            itemName= str.Split(new char[] { ' ' }).Select<string, int>(x => Convert.ToInt32(x)).ToArray();
+
             //读入所有的transaction
             str = sr.ReadLine();
             while (str!=null)
@@ -145,70 +31,177 @@ namespace DataMining_Assignment_2
                 LinkedList<int> data = new LinkedList<int>();
                 for (int i = 0; i < itemName.Count(); i++)
                 {
-                    if (tmp[i] == "1") data.AddLast(name[i]);
+                    if (tmp[i] == "1") data.AddLast(itemName[i]);
                 }
                 
                 Transaction<int> newTrans = new Transaction<int>(data.ToArray());
                 transactions.AddLast(newTrans);
                 str = sr.ReadLine();
             }
-
             sr.Close();
-            StreamWriter sw = new StreamWriter(@"G:\AgaIn_FieLd\大学_研究生\DataMining\assignment_2\test.txt");
-            sw.WriteLine(transactions.Count());
-            foreach (var trans in transactions)
-            {
-                foreach (var d in trans.Items)
-                {
-                    sw.Write(d.ToString() + ' ');
-                }
-                sw.WriteLine();
-            }
-            sw.Close();
         }
 
+        /// <summary>
+        /// hash函数
+        /// </summary>
+        /// <param name="data">数组</param>
+        /// <param name="level">对数组第level位置的数进行hash</param>
+        /// <returns>对2取模</returns>
         static int HashCode(int[] data, int level)
         {
             return (data[level] % 2);
         }
+
+        //hash树的节点打印函数
         static string NodePrint(int[] data)
         {
             string str = "";
             foreach (var i in data) str += i.ToString();
             return str;
         }
-        static void AprioriInitialize()
+        
+        /// <summary>
+        /// 将candidate按字典序排好
+        /// </summary>
+        /// <param name="candidate"></param>
+        /// <returns>按字典序排好的新的candidate</returns>
+        static Candidates<int> SortInTrie(Candidates<int> candidate)
         {
-            Candidates<int> newCandidate = new Candidates<int>();
-            foreach (var tmp in itemName)
+            //建树
+            TrieTree<int> trieTree = new TrieTree<int>();
+            foreach (var itemset in candidate.ItemSets)
             {
-                newCandidate.AddCandidate(new int[] { tmp });
+                trieTree.AddNode(itemset.data, itemset.value);
             }
-            HashTree<int> tree = new HashTree<int>(HashCode, 0, 2, 1,NodePrint);
-            foreach(var tmp in newCandidate.ItemSets)
+            //取出
+            Candidates<int> result = new Candidates<int>();
+            trieTree.ClearTag(trieTree.Root);
+            foreach (var node in trieTree.Root.children)
+            {
+                string str = trieTree.GetNodeData(node);
+                while (str != "")
+                {
+                    string[] strData = str.Split(new char[] { ' ' });
+                    int[] data = new int[strData.Length - 1];
+                    for (int i = 0; i < strData.Length - 1; i++) data[i] = Convert.ToInt32(strData[i]);
+                    result.AddCandidate(data, Convert.ToInt32(strData[strData.Length - 1]));
+                    str = trieTree.GetNodeData(node);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 对当前候选集中的项集求support counting
+        /// </summary>
+        /// <param name="candidate">候选项集</param>
+        /// <param name="depth">当前的候选项集的项的个数</param>
+        /// <returns>返回support counting大于等于minsup的项集</returns>
+        static Candidates<int> DoSupportCounting(Candidates<int> candidate, int depth)
+        {
+            //建立hash树
+            HashTree<int> tree = new HashTree<int>(HashCode, 0, 2, depth, NodePrint);
+            foreach (var tmp in candidate.ItemSets)
             {
                 tree.AddNode(tmp);
             }
-            foreach(var tmp in transactions)
+            //计算候选集中的support counting
+            foreach (var tmp in transactions)
             {
                 tree.ClearTag(tree.Root);
-                tree.SupportCounting(tmp,tree.Root,-1);
+                tree.SupportCounting(tmp, tree.Root, -1);
             }
-            tree.PrintTree(tree.Root);
+            //将support counting大于minsup的加入频繁项的集合
+            Candidates<int> tmpCandi = new Candidates<int>();
+            tree.ClearTag(tree.Root);
+            TreeNode<int> node = tree.GetLeaves(tree.Root);
+            while (node != null)
+            {
+                foreach (var d in node.list)
+                {
+                    if (d.value >= minsup * transactions.Count()) tmpCandi.AddCandidate(d);
+                }
+                node = tree.GetLeaves(tree.Root);
+            }
+            return SortInTrie(tmpCandi);
         }
+
+        /// <summary>
+        /// Apriori算法初始化，生成含有一个项的频繁项集
+        /// </summary>
+        static void AprioriInitialize()
+        {
+            frequentItemsets = new LinkedList<Candidates<int>>();
+            Candidates<int> newCandidate = new Candidates<int>();
+            //生成项数为1的项集
+            foreach (var tmp in itemName)
+            {
+                newCandidate.AddCandidate(new[] { tmp }, 0);
+            }
+            frequentItemsets.AddFirst(DoSupportCounting(newCandidate, 1));
+        }
+        
+        /// <summary>
+        /// Apriori算法
+        /// </summary>
         static void Apriori()
         {
-            
-            
+            //初始化，生成含有一个项的频繁项集
+            AprioriInitialize();
+            int depth = 1;
+            Console.WriteLine(depth.ToString() + "层结束");
+
+            Candidates<int> lastCandi = frequentItemsets.Last();
+            while(lastCandi.ItemSets.Count>0)
+            {
+                Candidates<int> tmpCandi = new Candidates<int>();
+                depth++;
+                //根据上一次的频繁项集合并生成新的候选集
+                foreach (var tmp in lastCandi.GenerateNewCandidates()) tmpCandi.AddCandidate(tmp, 0);
+                if (tmpCandi.ItemSets.Count == 0) break;
+                //判断当前候选集中的项集的所有子集是否都在上一层的频繁项集中
+                tmpCandi.Pruning(lastCandi.ItemSets);
+                //计算support counting留下大于minsup的项集
+                Candidates<int> newCandi = DoSupportCounting(tmpCandi,depth);
+                frequentItemsets.AddLast(newCandi);
+                lastCandi = newCandi;
+                Console.WriteLine(depth.ToString() + "层结束");
+            }
+            Console.WriteLine("按回车结束程序...");
+        }
+
+        /// <summary>
+        /// 按字典序输出结果
+        /// </summary>
+        static void OutputInTrieTree()
+        {
+            Candidates<int> result = new Candidates<int>();
+            TrieTree<int> trieTree = new TrieTree<int>();
+            //将所有项集按字典序排序
+            foreach(var candi in frequentItemsets)
+            {
+                foreach(var itemset in candi.ItemSets)
+                {
+                    result.AddCandidate(itemset);
+                }
+            }
+            result = SortInTrie(result);
+            //输出
+            StreamWriter sw = new StreamWriter(addrRoot + @"result.txt");
+            foreach(var itemset in result.ItemSets)
+            {
+                foreach (var item in itemset.data) sw.Write(item.ToString() + " ");
+                sw.WriteLine(((double)itemset.value / (double)transactions.Count).ToString("0.000"));
+            }
+            sw.Close();
         }
 
         static void Main(string[] args)
         {
+            minsup = 0.144;
             Input();
-            AprioriInitialize();
-            //test();
-            //testTree();
-            //testTrie();
+            Apriori();
+            OutputInTrieTree();
             Console.ReadLine();
         }
     }
